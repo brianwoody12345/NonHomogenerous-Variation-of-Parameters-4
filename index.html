@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathematical Solution</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Latin+Modern+Math&family=CMU+Serif:ital,wght@0,400;0,700;1,400&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #0a0a1a;
+            color: #ffffff;
+            font-family: 'CMU Serif', 'Latin Modern Math', serif;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .scene {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .math-container {
+            text-align: center;
+            max-width: 1100px;
+            width: 95%;
+            height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .title {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #4fc3f7;
+            margin-bottom: 15px;
+            text-align: center;
+            font-family: 'Latin Modern Math', 'CMU Serif', serif;
+            flex-shrink: 0;
+        }
+        
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        
+        .math-line {
+            font-size: 1.5em;
+            margin: 8px 0;
+            color: #e3f2fd;
+            text-align: center;
+            line-height: 1.2;
+            opacity: 0;
+            transform: translateY(20px);
+            max-width: 100%;
+        }
+        
+        .compact-line {
+            font-size: 1.4em;
+            margin: 6px 0;
+            line-height: 1.1;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        
+        .fade-in {
+            animation: fadeInUp 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .superscript {
+            vertical-align: super;
+            font-size: 0.7em;
+            margin-left: 1px;
+        }
+        
+        .subscript {
+            vertical-align: sub;
+            font-size: 0.7em;
+            margin-left: 1px;
+        }
+        
+        .matrix {
+            display: inline-table;
+            vertical-align: middle;
+            margin: 0 3px;
+            border-collapse: collapse;
+        }
+        
+        .matrix-row {
+            display: table-row;
+        }
+        
+        .matrix-cell {
+            display: table-cell;
+            padding: 0px 4px;
+            text-align: center;
+            font-size: 0.8em;
+        }
+        
+        .vertical-bar {
+            border-left: 1px solid #e3f2fd;
+            border-right: 1px solid #e3f2fd;
+            padding: 0 4px;
+            margin: 0 3px;
+            display: inline-block;
+        }
+        
+        .final-box {
+            border: 2px solid #4fc3f7;
+            padding: 20px 30px;
+            border-radius: 10px;
+            margin: 15px 0;
+            background: rgba(79, 195, 247, 0.1);
+            box-shadow: 0 0 20px rgba(79, 195, 247, 0.25);
+            font-size: 1.8em;
+            font-weight: bold;
+            flex-shrink: 0;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        
+        .slide-counter {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            color: #666;
+            font-size: 0.9em;
+            font-family: 'CMU Serif', serif;
+        }
+        
+        .spacer {
+            height: 5px;
+            flex-shrink: 0;
+        }
+        
+        .tiny-spacer {
+            height: 3px;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="scene">
+        <div class="math-container">
+            <div class="title" id="slideTitle">Variation of Parameters Solution</div>
+            <div class="content-area" id="contentArea">
+                <div class="math-line">Problem 4: Find the general solution</div>
+                <div class="spacer"></div>
+                <div class="math-line">y″ + y = tan t, 0 < t < π/2</div>
+            </div>
+        </div>
+        <div class="slide-counter" id="counter">1/10</div>
+    </div>
+
+    <script>
+        const slides = [
+            {
+                title: "Problem Statement",
+                content: [
+                    "Problem 4: Find the general solution",
+                    "y″ + y = tan t",
+                    "where 0 < t < π/2",
+                    "Using variation of parameters"
+                ]
+            },
+            {
+                title: "Step 1: Homogeneous Solution",
+                content: [
+                    "Homogeneous equation:",
+                    "y″ + y = 0",
+                    "Characteristic equation:",
+                    "r² + 1 = 0",
+                    "Roots: r = ±i",
+                    "Complementary solution:",
+                    "y_c(t) = c₁ cos t + c₂ sin t"
+                ]
+            },
+            {
+                title: "Step 2: Fundamental Solutions",
+                content: [
+                    "Fundamental solutions:",
+                    "y₁(t) = cos t",
+                    "y₂(t) = sin t",
+                    "These satisfy y₁″ + y₁ = 0",
+                    "and y₂″ + y₂ = 0"
+                ]
+            },
+            {
+                title: "Step 3: Wronskian",
+                content: [
+                    "Wronskian determinant:",
+                    "W(y₁, y₂) = det",
+                    "<div class='vertical-bar'><div class='matrix'><div class='matrix-row'><div class='matrix-cell'>cos t</div><div class='matrix-cell'>sin t</div></div><div class='matrix-row'><div class='matrix-cell'>-sin t</div><div class='matrix-cell'>cos t</div></div></div></div>",
+                    "W = cos t · cos t − sin t · (−sin t)",
+                    "W = cos²t + sin²t = 1"
+                ]
+            },
+            {
+                title: "Step 4: Variation Setup",
+                content: [
+                    "Non-homogeneous term:",
+                    "g(t) = tan t",
+                    "Variation of parameters formula:",
+                    "y_p = −y₁∫(y₂g/W)dt + y₂∫(y₁g/W)dt"
+                ]
+            },
+            {
+                title: "Step 5: First Integral",
+                content: [
+                    "First integral:",
+                    "∫(y₂g/W)dt = ∫(sin t · tan t / 1)dt",
+                    "= ∫(sin t · sin t / cos t)dt",
+                    "= ∫(sin²t / cos t)dt"
+                ]
+            },
+            {
+                title: "Step 6: Second Integral",
+                content: [
+                    "Second integral:",
+                    "∫(y₁g/W)dt = ∫(cos t · tan t / 1)dt",
+                    "= ∫(cos t · sin t / cos t)dt",
+                    "= ∫ sin t dt"
+                ]
+            },
+            {
+                title: "Step 7: Compute Second Integral",
+                content: [
+                    "Second integral is easier:",
+                    "∫ sin t dt = −cos t"
+                ]
+            },
+            {
+                title: "Step 8: Compute First Integral",
+                content: [
+                    "First integral:",
+                    "∫(sin²t / cos t)dt = ∫((1 − cos²t) / cos t)dt",
+                    "= ∫(1/cos t − cos t)dt",
+                    "= ∫ sec t dt − ∫ cos t dt",
+                    "= ln|sec t + tan t| − sin t"
+                ]
+            },
+            {
+                title: "Step 9: Particular Solution",
+                content: [
+                    "Construct particular solution:",
+                    "y_p = −cos t[ln|sec t + tan t| − sin t]",
+                    "+ sin t[−cos t]",
+                    "Simplify:",
+                    "y_p = −cos t ln|sec t + tan t| + cos t sin t",
+                    "− sin t cos t",
+                    "y_p(t) = −cos t ln|sec t + tan t|"
+                ]
+            },
+            {
+                title: "Final Solution",
+                content: [
+                    "General solution:",
+                    "y(t) = y_c(t) + y_p(t)",
+                    "<div class='final-box'>y(t) = c₁ cos t + c₂ sin t</div>",
+                    "<div class='final-box'>− cos t ln|sec t + tan t|</div>",
+                    "Solution complete ✓"
+                ]
+            }
+        ];
+
+        let currentSlide = 0;
+
+        function showSlide(slideIndex) {
+            const slide = slides[slideIndex];
+            const titleElement = document.getElementById('slideTitle');
+            const contentArea = document.getElementById('contentArea');
+            const counter = document.getElementById('counter');
+            
+            // Update title
+            titleElement.textContent = slide.title;
+            
+            // Build content
+            let contentHTML = '';
+            slide.content.forEach(line => {
+                if (line.includes('final-box')) {
+                    contentHTML += line;
+                } else if (slideIndex === 3) { // Wronskian slide gets compact styling
+                    contentHTML += `<div class="compact-line">${line}</div>`;
+                } else {
+                    contentHTML += `<div class="math-line">${line}</div>`;
+                }
+                if (!line.includes('final-box')) {
+                    contentHTML += `<div class="tiny-spacer"></div>`;
+                }
+            });
+            
+            contentArea.innerHTML = contentHTML;
+            counter.textContent = `${slideIndex + 1}/${slides.length}`;
+            
+            // Animate ALL elements with proper sequential timing
+            const allElements = contentArea.querySelectorAll('.math-line, .compact-line, .final-box');
+            allElements.forEach((element, index) => {
+                element.style.animationDelay = `${index * 0.4}s`;
+                // Remove any existing classes and re-add for clean animation
+                element.classList.remove('fade-in');
+                setTimeout(() => {
+                    element.classList.add('fade-in');
+                }, 100 + (index * 400));
+            });
+            
+            currentSlide = slideIndex;
+        }
+
+        function nextSlide() {
+            if (currentSlide < slides.length - 1) {
+                showSlide(currentSlide + 1);
+            }
+        }
+
+        // Auto-advance every 8 seconds
+        let slideInterval = setInterval(nextSlide, 8000);
+
+        // Manual navigation
+        document.addEventListener('click', () => {
+            clearInterval(slideInterval);
+            nextSlide();
+            slideInterval = setInterval(nextSlide, 8000);
+        });
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === ' ' || e.key === 'ArrowRight') {
+                clearInterval(slideInterval);
+                nextSlide();
+                slideInterval = setInterval(nextSlide, 8000);
+            }
+        });
+
+        // Start with first slide
+        showSlide(0);
+    </script>
+</body>
+</html>
