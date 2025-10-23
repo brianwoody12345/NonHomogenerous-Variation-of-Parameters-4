@@ -162,6 +162,37 @@
             font-family: 'CMU Serif', serif;
         }
         
+        .controls {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .control-btn {
+            background: rgba(79, 195, 247, 0.2);
+            border: 1px solid #4fc3f7;
+            color: #4fc3f7;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'CMU Serif', serif;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+        
+        .control-btn:hover {
+            background: rgba(79, 195, 247, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .paused {
+            background: rgba(255, 87, 87, 0.2);
+            border-color: #ff5757;
+            color: #ff5757;
+        }
+        
         .spacer {
             height: 5px;
             flex-shrink: 0;
@@ -183,6 +214,11 @@
                 <div class="math-line">y″ + y = tan t, 0 < t < π/2</div>
             </div>
         </div>
+        <div class="controls">
+            <button class="control-btn" id="pauseBtn">Pause</button>
+            <button class="control-btn" id="prevBtn">Previous</button>
+            <button class="control-btn" id="nextBtn">Next</button>
+        </div>
         <div class="slide-counter" id="counter">1/11</div>
     </div>
 
@@ -196,7 +232,7 @@
                     "where 0 < t < π/2",
                     "Using variation of parameters"
                 ],
-                duration: 8000 // 8 seconds
+                duration: 8000
             },
             {
                 title: "Step 1: Homogeneous Solution",
@@ -212,7 +248,7 @@
                     "y_c(t) = e^(0·t)[c₁ cos t + c₂ sin t]",
                     "y_c(t) = c₁ cos t + c₂ sin t"
                 ],
-                duration: 12000 // 12 seconds for this dense slide
+                duration: 12000
             },
             {
                 title: "Step 2: Fundamental Solutions",
@@ -307,18 +343,20 @@
                     "<div class='final-box'>− cos t ln|sec t + tan t|</div>",
                     "Solution complete ✓"
                 ],
-                duration: 10000 // 10 seconds for final solution
+                duration: 10000
             }
         ];
 
         let currentSlide = 0;
         let slideInterval;
+        let isPaused = false;
 
         function showSlide(slideIndex) {
             const slide = slides[slideIndex];
             const titleElement = document.getElementById('slideTitle');
             const contentArea = document.getElementById('contentArea');
             const counter = document.getElementById('counter');
+            const prevBtn = document.getElementById('prevBtn');
             
             // Update title
             titleElement.textContent = slide.title;
@@ -328,9 +366,9 @@
             slide.content.forEach(line => {
                 if (line.includes('final-box')) {
                     contentHTML += line;
-                } else if (slideIndex === 2 || slideIndex === 3) { // Compact slides
+                } else if (slideIndex === 2 || slideIndex === 3) {
                     contentHTML += `<div class="compact-line">${line}</div>`;
-                } else if (slideIndex === 1) { // Step 1 gets smaller lines
+                } else if (slideIndex === 1) {
                     contentHTML += `<div class="small-line">${line}</div>`;
                 } else {
                     contentHTML += `<div class="math-line">${line}</div>`;
@@ -343,11 +381,13 @@
             contentArea.innerHTML = contentHTML;
             counter.textContent = `${slideIndex + 1}/${slides.length}`;
             
+            // Update previous button state
+            prevBtn.disabled = slideIndex === 0;
+            
             // Animate ALL elements with proper sequential timing
             const allElements = contentArea.querySelectorAll('.math-line, .compact-line, .small-line, .final-box');
             allElements.forEach((element, index) => {
                 element.style.animationDelay = `${index * 0.4}s`;
-                // Remove any existing classes and re-add for clean animation
                 element.classList.remove('fade-in');
                 setTimeout(() => {
                     element.classList.add('fade-in');
@@ -357,8 +397,10 @@
             currentSlide = slideIndex;
             
             // Set up auto-advance with custom duration for each slide
-            clearInterval(slideInterval);
-            slideInterval = setInterval(nextSlide, slide.duration);
+            if (!isPaused) {
+                clearInterval(slideInterval);
+                slideInterval = setInterval(nextSlide, slide.duration);
+            }
         }
 
         function nextSlide() {
@@ -367,20 +409,60 @@
             }
         }
 
-        // Manual navigation
-        document.addEventListener('click', () => {
-            clearInterval(slideInterval);
-            nextSlide();
-            // Reset interval with current slide's duration
-            slideInterval = setInterval(nextSlide, slides[currentSlide].duration);
+        function previousSlide() {
+            if (currentSlide > 0) {
+                showSlide(currentSlide - 1);
+            }
+        }
+
+        function togglePause() {
+            const pauseBtn = document.getElementById('pauseBtn');
+            isPaused = !isPaused;
+            
+            if (isPaused) {
+                clearInterval(slideInterval);
+                pauseBtn.textContent = 'Resume';
+                pauseBtn.classList.add('paused');
+            } else {
+                pauseBtn.textContent = 'Pause';
+                pauseBtn.classList.remove('paused');
+                // Resume with current slide's duration
+                slideInterval = setInterval(nextSlide, slides[currentSlide].duration);
+            }
+        }
+
+        // Event listeners for controls
+        document.getElementById('pauseBtn').addEventListener('click', togglePause);
+        document.getElementById('prevBtn').addEventListener('click', previousSlide);
+        document.getElementById('nextBtn').addEventListener('click', nextSlide);
+
+        // Manual navigation via click/spacebar (doesn't affect pause state)
+        document.addEventListener('click', (e) => {
+            // Only advance if clicking on the main content (not controls)
+            if (!e.target.closest('.controls')) {
+                clearInterval(slideInterval);
+                nextSlide();
+                if (!isPaused) {
+                    slideInterval = setInterval(nextSlide, slides[currentSlide].duration);
+                }
+            }
         });
         
         document.addEventListener('keydown', (e) => {
             if (e.key === ' ' || e.key === 'ArrowRight') {
                 clearInterval(slideInterval);
                 nextSlide();
-                // Reset interval with current slide's duration
-                slideInterval = setInterval(nextSlide, slides[currentSlide].duration);
+                if (!isPaused) {
+                    slideInterval = setInterval(nextSlide, slides[currentSlide].duration);
+                }
+            } else if (e.key === 'ArrowLeft') {
+                clearInterval(slideInterval);
+                previousSlide();
+                if (!isPaused) {
+                    slideInterval = setInterval(nextSlide, slides[currentSlide].duration);
+                }
+            } else if (e.key === 'p' || e.key === 'P') {
+                togglePause();
             }
         });
 
